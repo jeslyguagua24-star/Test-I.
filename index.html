@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Test - Informática Aplicada</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .quiz-container { width: 100%; max-width: 600px; background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 30px; }
+        .header { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; text-align: center; }
+        .question { font-size: 18px; font-weight: bold; margin-bottom: 20px; color: #333; }
+        .options { list-style: none; padding: 0; }
+        .option { background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .option:hover { background: #e9ecef; }
+        .option.selected { background: #007bff; color: white; border-color: #007bff; }
+        .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
+        .btn { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .result { text-align: center; font-size: 22px; font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container" id="quiz">
+    <div class="header">
+        <h2>Simulador de Emprendimiento Digital</h2>
+        <p>2do. D - BGU Informática Aplicada</p>
+    </div>
+    <div id="quiz-content">
+        <div class="question" id="q-text">Cargando...</div>
+        <ul class="options" id="options"></ul>
+        <div class="footer">
+            <span id="progress">Pregunta 1 de 20</span>
+            <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>Responder</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "¿Qué ventaja tiene el negocio digital sobre el tradicional?", o: ["Menores costos operativos, velocidad y escalabilidad", "Mayor infraestructura física", "Canales exclusivamente offline", "No requiere atención al cliente"], c: 0 },
+        { q: "¿Cuál es el modelo de negocio de Kushki Pay en Ecuador?", o: ["Modelo C2C", "Modelo B2B (Empresa a Empresa)", "Modelo B2C", "Modelo G2C"], c: 1 },
+        { q: "¿Qué componente de la tienda online gestiona el inventario?", o: ["Pasarela de pagos", "Servidor DNS", "Logística y Envío", "Certificado SSL"], c: 2 },
+        { q: "¿Qué es el Producto Mínimo Viable (MVP)?", o: ["Un prototipo final costoso", "La versión con características fundamentales para probar el mercado", "Un software libre sin funciones", "Un documento teórico"], c: 1 },
+        { q: "¿Qué modelo de e-commerce define a la plataforma Tipti?", o: ["B2C (Business to Consumer)", "B2B", "C2C", "G2B"], c: 0 },
+        { q: "¿Qué herramienta ayuda a posicionar orgánicamente una web?", o: ["Pauta tradicional", "Optimización para Motores de Búsqueda (SEO)", "Bases de datos", "Protocolos FTP"], c: 1 },
+        { q: "¿Cuál es la función de una pasarela de pago como Payphone?", o: ["Almacenar stock físico", "Conectar e-commerce con redes de cobro interbancarias", "Modificar diseño gráfico", "Acelerar servidor DNS"], c: 1 },
+        { q: "¿Qué es el modelo de suscripción?", o: ["Un pago único", "Cobros automatizados y recurrentes por acceso continuo", "Venta directa en tiendas", "Distribución mayorista"], c: 1 },
+        { q: "¿A qué se refiere el término 'última milla'?", o: ["Proceso de fabricación", "Paso final de distribución y entrega física al consumidor", "Primera fase de desarrollo", "Costo de servidores"], c: 1 },
+        { q: "¿Qué es un Patrocinio de Marca o Sponsorship?", o: ["Compra de banners", "Monetización donde una marca paga por integrar un producto", "Intercambio gratuito", "Desarrollo de apps"], c: 1 },
+        { q: "¿Qué es un infoproducto?", o: ["Dispositivo de hardware", "Un bien digital basado en conocimiento transferible por red", "Folleto impreso", "Servicio presencial"], c: 1 },
+        { q: "¿Qué métrica representa el costo de adquirir un cliente nuevo?", o: ["ROI", "MVP", "CAC (Customer Acquisition Cost)", "SEO"], c: 2 },
+        { q: "¿Qué es un Marketplace?", o: ["Plataforma que centraliza múltiples vendedores y compradores", "Sitio de un único fabricante", "Red social de ocio", "Protocolo de transferencia"], c: 0 },
+        { q: "¿Qué busca mitigar el diseño de un proceso de pago rápido?", o: ["Precio final del artículo", "La fricción cognitiva y operativa previniendo el abandono", "Velocidad del servidor", "Pauta publicitaria"], c: 1 },
+        { q: "¿Qué significa B2B?", o: ["Ventas entre usuarios comunes", "Transacciones comerciales electrónicas entre empresas", "Ventas del gobierno", "Comercio minorista"], c: 1 },
+        { q: "¿Qué es el Social Commerce?", o: ["Vender en ferias", "Pauta en televisión", "Integrar el embudo de conversión en la API de una red social", "Correos masivos"], c: 2 },
+        { q: "¿Qué protocolo de seguridad cifra la comunicación online?", o: ["Protocolo FTP", "Certificado SSL/TLS", "Conexión HTTP simple", "Base de datos MySQL"], c: 1 },
+        { q: "¿Qué es el Retargeting en marketing?", o: ["Borrar base de datos", "Mostrar anuncios a usuarios que visitaron la web sin comprar", "Cambiar el dominio", "Llamadas directas"], c: 1 },
+        { q: "¿Qué es el Dropshipping como modelo operativo?", o: ["Vender sin internet", "Venta minorista donde el proveedor despacha directamente", "Fabricar hardware", "Pagar hosting"], c: 1 },
+        { q: "¿Qué peligro representa gastar en tecnología compleja antes de validar?", o: ["Ahorrar capital", "Consumir recursos sin validar si existe demanda real (Product-Market Fit)", "Usar plantillas", "Lanzar de inmediato"], c: 1 }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let selected = null;
+
+    function loadQ() {
+        selected = null;
+        document.getElementById("next-btn").disabled = true;
+        document.getElementById("next-btn").innerText = current === questions.length - 1 ? "Finalizar" : "Responder";
+        
+        const q = questions[current];
+        document.getElementById("q-text").innerText = q.q;
+        document.getElementById("progress").innerText = `Pregunta ${current + 1} de ${questions.length}`;
+        
+        const opts = document.getElementById("options");
+        opts.innerHTML = "";
+        
+        q.o.forEach((opt, i) => {
+            const li = document.createElement("li");
+            li.className = "option";
+            li.innerText = opt;
+            li.onclick = () => {
+                selected = i;
+                document.querySelectorAll(".option").forEach(el => el.classList.remove("selected"));
+                li.classList.add("selected");
+                document.getElementById("next-btn").disabled = false;
+            };
+            opts.appendChild(li);
+        });
+    }
+
+    function nextQuestion() {
+        if (selected === questions[current].c) score += 0.5;
+        current++;
+        if (current < questions.length) {
+            loadQ();
+        } else {
+            document.getElementById("quiz-content").innerHTML = `
+                <div class="result">
+                    <p>¡Test Completado con Éxito!</p>
+                    <p style="font-size: 40px; color: #007bff;">Nota: ${score.toFixed(1)} / 10.0</p>
+                    <p style="font-size: 16px; color: #555; font-weight: normal;">Toma captura de esta pantalla para tu Word.</p>
+                </div>
+            `;
+        }
+    }
+
+    loadQ();
+</script>
+
+</body>
+</html>
